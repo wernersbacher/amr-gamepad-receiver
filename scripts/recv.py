@@ -2,6 +2,10 @@ import rospy
 from geometry_msgs.msg import Twist
 import socket
 
+"""
+    TODO: senden funzt nicht?
+    strg c funzt nicht
+"""
 
 rospy.init_node("gamepad_translater", anonymous=True)
 
@@ -35,16 +39,23 @@ def convert_to_twist(throttle, steering):
 # connect to cmd_vel
 vel_publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
 
-while(True):
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-    message = bytesAddressPair[0].decode("utf-8")
+try:
+    while(True):
+        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+        message = bytesAddressPair[0].decode("utf-8")
 
-    clientMsg = "Message from Client: {} ".format(message)
+        clientMsg = "Message from Client: {} ".format(message)
 
-    throttle, steering = message.split(",")
-    
-    rospy.loginfo(f"throttle={throttle}, steering={steering}")
+        throttle, steering = message.split(",")
+        
+        rospy.loginfo(f"throttle={throttle}, steering={steering}")
 
-    twist_msg = convert_to_twist(throttle, steering)
-    vel_publisher.publish(twist_msg)
-    rospy.loginfo("Published data")
+        twist_msg = convert_to_twist(throttle, steering)
+        vel_publisher.publish(twist_msg)
+        rospy.loginfo("Published data")
+
+except KeyboardInterrupt:
+    print('interrupted!')
+    socket.close()
+
+
