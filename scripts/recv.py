@@ -2,6 +2,9 @@ import rospy
 from geometry_msgs.msg import Twist
 import socket
 
+
+rospy.init_node("gamepad_translater", anonymous=True)
+
 localIP     = "0.0.0.0"
 localPort   = 44000
 bufferSize  = 128
@@ -13,6 +16,7 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPServerSocket.bind((localIP, localPort))
 
 rospy.loginfo("UDP Gamepad Receiver server up and listening")
+
 
 # Listen for incoming datagrams
 
