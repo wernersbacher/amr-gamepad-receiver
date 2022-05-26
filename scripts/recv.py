@@ -45,8 +45,6 @@ try:
             bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
             message = bytesAddressPair[0].decode("utf-8")
 
-            clientMsg = "Message from Client: {} ".format(message)
-
             throttle, steering = message.split(",")
             
             rospy.loginfo(f"throttle={throttle}, steering={steering}")
