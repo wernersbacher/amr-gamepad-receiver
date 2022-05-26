@@ -3,11 +3,10 @@ from geometry_msgs.msg import Twist
 import socket
 
 """
-    TODO: senden funzt nicht?
-    strg c funzt nicht
+    run this on a node which is connected to the ros master
 """
 
-rospy.init_node("gamepad_translater", anonymous=True)
+rospy.init_node("gamepad_translater")
 
 localIP     = "0.0.0.0"
 localPort   = 44000
@@ -18,6 +17,7 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # Bind to address and ip
 UDPServerSocket.bind((localIP, localPort))
+UDPServerSocket.settimeout(1.0)
 
 rospy.loginfo("UDP Gamepad Receiver server up and listening")
 
@@ -41,18 +41,24 @@ vel_publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
 
 try:
     while(True):
-        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAddressPair[0].decode("utf-8")
+        try:
+            bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+            message = bytesAddressPair[0].decode("utf-8")
 
-        clientMsg = "Message from Client: {} ".format(message)
+            clientMsg = "Message from Client: {} ".format(message)
 
-        throttle, steering = message.split(",")
+            throttle, steering = message.split(",")
+            
+            rospy.loginfo(f"throttle={throttle}, steering={steering}")
+
+            twist_msg = convert_to_twist(throttle, steering)
+            vel_publisher.publish(twist_msg)
+            rospy.loginfo("Published data")
         
-        rospy.loginfo(f"throttle={throttle}, steering={steering}")
-
-        twist_msg = convert_to_twist(throttle, steering)
-        vel_publisher.publish(twist_msg)
-        rospy.loginfo("Published data")
+        except socket.timeout:
+            pass
+        except KeyboardInterrupt:
+            break
 
 except KeyboardInterrupt:
     print('interrupted!')
